@@ -1,0 +1,50 @@
+version: '3.7'
+services:
+  postgres:
+    image: docker.io/bitnami/postgresql:latest
+    ports:
+      - '5432:5432'
+    networks:
+      - pg-moodle-network
+    volumes:
+      - 'pg_postgresql_data:/bitnami/postgresql'
+    environment:
+      - POSTGRESQL_DATABASE=bitnami_moodle
+      - POSTGRESQL_USERNAME=bn_moodle
+      - POSTGRESQL_PASSWORD=bn_moodle_pwd
+      - POSTGRESQL_POSTGRES_PASSWORD=adminroot
+      - ALLOW_EMPTY_PASSWORD=no
+  moodle:
+    image: docker.io/bitnami/moodle:latest
+    ports:
+      - '80:8080'
+      - '443:8443'
+    networks:
+      - pg-moodle-network
+    environment:
+      - MOODLE_DATABASE_TYPE=pgsql
+      - MOODLE_DATABASE_HOST=postgres
+      - MOODLE_DATABASE_PORT_NUMBER=5432
+      - MOODLE_DATABASE_NAME=bitnami_moodle
+      - MOODLE_DATABASE_USER=bn_moodle
+      - MOODLE_DATABASE_PASSWORD=bn_moodle_pwd
+      - ALLOW_EMPTY_PASSWORD=no
+      - MOODLE_USERNAME=admin
+      - MOODLE_PASSWORD=moodle
+      - MOODLE_SITE_NAME=BitnamiMoodle
+    volumes:
+      - 'pg_moodle_data:/bitnami/moodle'
+      - 'pg_moodledata_data:/bitnami/moodledata'
+    depends_on:
+      - postgres
+volumes:
+  pg_postgresql_data:
+    driver: local
+  pg_moodle_data:
+    driver: local
+  pg_moodledata_data:
+    driver: local
+
+networks:
+  pg-moodle-network:
+    driver: bridge
